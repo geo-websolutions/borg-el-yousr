@@ -331,8 +331,27 @@ export default function AdminDashboard() {
   const closeModal = () => {
     setIsModalOpen(false);
     setModalType(null);
-    // No need to reload data - real-time listeners will handle updates
   };
+
+  useEffect(() => {
+    if (isModalOpen) {
+      window.history.pushState({ modalOpen: true }, "");
+
+      const handlePopState = (event: PopStateEvent) => {
+        closeModal();
+      };
+
+      window.addEventListener("popstate", handlePopState);
+
+      return () => {
+        window.removeEventListener("popstate", handlePopState);
+        if (window.history.state?.modalOpen) {
+          window.history.back();
+        }
+      };
+    }
+  }, [isModalOpen]);
+
   // Add this function
   const calculatePaymentStatus = useCallback(async () => {
     const monthlyStatus: { [floorId: string]: boolean } = {};
